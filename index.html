@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kobold &amp; Komet — Eine 2D-Animationsserie</title>
+<meta name="description" content="Kobold & Komet — eine warmherzige 2D-Animationsserie über den kleinen Waldkobold Pip und den verirrten Kometen Fizz. Mit den ersten beiden Folgen direkt im Browser.">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='%23ffd479'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<div class="site-stars" aria-hidden="true"></div>
+
+<!-- ============================================================
+     WIEDERVERWENDBARE SVG-FIGUREN (Sprite)
+     ============================================================ -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="fizzGrad" cx="42%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#fff8dc"/>
+      <stop offset="45%" stop-color="#ffe08a"/>
+      <stop offset="100%" stop-color="#ffb454"/>
+    </radialGradient>
+    <radialGradient id="fizzDim" cx="42%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#c9cfe0"/>
+      <stop offset="100%" stop-color="#7d84a0"/>
+    </radialGradient>
+    <linearGradient id="pipBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8fe09a"/>
+      <stop offset="100%" stop-color="#4fa96a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- PIP — der Waldkobold -->
+  <symbol id="pip" viewBox="0 0 100 120">
+    <ellipse cx="50" cy="112" rx="26" ry="6" fill="rgba(0,0,0,0.25)"/>
+    <!-- Beine -->
+    <rect x="38" y="88" width="9" height="20" rx="4" fill="#3f8a56"/>
+    <rect x="53" y="88" width="9" height="20" rx="4" fill="#3f8a56"/>
+    <!-- Körper -->
+    <path d="M50 34 C74 34 82 58 80 78 C78 96 64 100 50 100 C36 100 22 96 20 78 C18 58 26 34 50 34 Z" fill="url(#pipBody)"/>
+    <!-- Bauch -->
+    <ellipse cx="50" cy="76" rx="16" ry="18" fill="#d8f6d0" opacity="0.85"/>
+    <!-- Arme -->
+    <path d="M22 66 C12 68 8 78 10 86" stroke="#4fa96a" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M78 66 C88 68 92 78 90 86" stroke="#4fa96a" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <!-- Blattmütze -->
+    <path d="M50 34 C46 16 30 10 22 14 C34 18 40 28 44 36 Z" fill="#6bbf59"/>
+    <path d="M50 34 C54 14 70 8 80 14 C66 18 58 28 56 36 Z" fill="#57ac48"/>
+    <path d="M50 36 C50 20 50 12 50 8" stroke="#3f8a44" stroke-width="3" stroke-linecap="round"/>
+    <!-- Gesicht -->
+    <circle cx="41" cy="62" r="6.5" fill="#fff"/>
+    <circle cx="60" cy="62" r="6.5" fill="#fff"/>
+    <circle cx="42.5" cy="63" r="3.4" fill="#222b3a"/>
+    <circle cx="61.5" cy="63" r="3.4" fill="#222b3a"/>
+    <circle cx="43.8" cy="61.6" r="1.1" fill="#fff"/>
+    <circle cx="62.8" cy="61.6" r="1.1" fill="#fff"/>
+    <circle cx="33" cy="72" r="4" fill="#ff9db0" opacity="0.6"/>
+    <circle cx="67" cy="72" r="4" fill="#ff9db0" opacity="0.6"/>
+    <path d="M45 74 Q50 79 55 74" stroke="#2c5138" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- FIZZ — der Komet -->
+  <symbol id="fizz" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="30" fill="url(#fizzGrad)"/>
+    <circle cx="50" cy="50" r="30" fill="none" stroke="#fff6d0" stroke-width="1.5" opacity="0.6"/>
+    <!-- Funkelspitzen -->
+    <g fill="#fff3c4" opacity="0.9">
+      <path d="M50 6 l3 12 -3 4 -3 -4 Z"/>
+      <path d="M50 94 l3 -12 -3 -4 -3 4 Z"/>
+      <path d="M6 50 l12 3 4 -3 -4 -3 Z"/>
+      <path d="M94 50 l-12 3 -4 -3 4 -3 Z"/>
+    </g>
+    <!-- Gesicht -->
+    <circle cx="42" cy="47" r="4.5" fill="#5a3d12"/>
+    <circle cx="58" cy="47" r="4.5" fill="#5a3d12"/>
+    <circle cx="43.4" cy="45.6" r="1.2" fill="#fff"/>
+    <circle cx="59.4" cy="45.6" r="1.2" fill="#fff"/>
+    <path d="M42 58 Q50 65 58 58" stroke="#5a3d12" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <circle cx="35" cy="55" r="3.2" fill="#ff9db0" opacity="0.5"/>
+    <circle cx="65" cy="55" r="3.2" fill="#ff9db0" opacity="0.5"/>
+  </symbol>
+
+  <!-- FIZZ dim (ängstlich, ohne Glanz) -->
+  <symbol id="fizz-dim" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="28" fill="url(#fizzDim)"/>
+    <circle cx="42" cy="49" r="4.2" fill="#3a4056"/>
+    <circle cx="58" cy="49" r="4.2" fill="#3a4056"/>
+    <path d="M43 60 Q50 55 57 60" stroke="#3a4056" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- UHU OTTOKAR -->
+  <symbol id="owl" viewBox="0 0 100 120">
+    <ellipse cx="50" cy="114" rx="22" ry="5" fill="rgba(0,0,0,0.25)"/>
+    <path d="M50 26 C74 26 84 52 82 82 C80 104 66 112 50 112 C34 112 20 104 18 82 C16 52 26 26 50 26 Z" fill="#7c6a58"/>
+    <ellipse cx="50" cy="82" rx="20" ry="26" fill="#a89279"/>
+    <!-- Ohrbüschel -->
+    <path d="M28 30 L22 12 L38 26 Z" fill="#6a5a4a"/>
+    <path d="M72 30 L78 12 L62 26 Z" fill="#6a5a4a"/>
+    <!-- Augen + Brille -->
+    <circle cx="38" cy="52" r="14" fill="#fff"/>
+    <circle cx="62" cy="52" r="14" fill="#fff"/>
+    <circle cx="38" cy="52" r="6" fill="#2c2a2a"/>
+    <circle cx="62" cy="52" r="6" fill="#2c2a2a"/>
+    <circle cx="40" cy="50" r="1.8" fill="#fff"/>
+    <circle cx="64" cy="50" r="1.8" fill="#fff"/>
+    <circle cx="38" cy="52" r="14" fill="none" stroke="#d9b25a" stroke-width="2.5"/>
+    <circle cx="62" cy="52" r="14" fill="none" stroke="#d9b25a" stroke-width="2.5"/>
+    <line x1="52" y1="52" x2="48" y2="52" stroke="#d9b25a" stroke-width="2.5"/>
+    <path d="M50 60 l7 8 -14 0 Z" fill="#e8a33d"/>
+  </symbol>
+
+  <!-- BAUM -->
+  <symbol id="tree" viewBox="0 0 100 160">
+    <rect x="44" y="96" width="12" height="60" rx="4" fill="#20304f"/>
+    <path d="M50 4 C22 40 30 66 50 66 C70 66 78 40 50 4 Z" fill="#16233f"/>
+    <path d="M50 30 C26 62 34 90 50 90 C66 90 74 62 50 30 Z" fill="#1b2a49"/>
+    <path d="M50 56 C30 84 38 108 50 108 C62 108 70 84 50 56 Z" fill="#21335a"/>
+  </symbol>
+
+  <!-- PILZHAUS -->
+  <symbol id="mushroom" viewBox="0 0 140 130">
+    <rect x="52" y="70" width="36" height="52" rx="10" fill="#efe4cf"/>
+    <path d="M70 8 C22 8 6 44 6 58 C6 66 22 68 70 68 C118 68 134 66 134 58 C134 44 118 8 70 8 Z" fill="#e0564f"/>
+    <circle cx="34" cy="34" r="7" fill="#fff" opacity="0.9"/>
+    <circle cx="60" cy="24" r="6" fill="#fff" opacity="0.9"/>
+    <circle cx="90" cy="28" r="8" fill="#fff" opacity="0.9"/>
+    <circle cx="112" cy="42" r="6" fill="#fff" opacity="0.9"/>
+    <circle cx="72" cy="46" r="5" fill="#fff" opacity="0.9"/>
+    <path d="M60 122 C60 104 80 104 80 122 Z" fill="#6a4a3a"/>
+    <ellipse cx="70" cy="112" rx="10" ry="12" fill="#4a3226"/>
+  </symbol>
+
+  <!-- HERZ -->
+  <symbol id="heart" viewBox="0 0 32 30">
+    <path d="M16 28 C-6 14 4 -2 16 8 C28 -2 38 14 16 28 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- NOTE -->
+  <symbol id="note" viewBox="0 0 24 32">
+    <circle cx="8" cy="26" r="5" fill="currentColor"/>
+    <rect x="12" y="4" width="3" height="22" fill="currentColor"/>
+    <path d="M12 4 C18 5 20 9 20 13 C18 10 14 10 12 12 Z" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<!-- ============================================================
+     NAV
+     ============================================================ -->
+<nav class="nav">
+  <button class="nav__brand" data-goto="#/">
+    <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#ffd479"/><circle cx="13" cy="14" r="2" fill="#5a3d12"/><circle cx="19" cy="14" r="2" fill="#5a3d12"/></svg>
+    <span>Kobold&nbsp;&amp;&nbsp;Komet</span>
+  </button>
+  <div class="nav__spacer"></div>
+  <div class="nav__links">
+    <button class="nav__link" data-route="home"    data-goto="#/">Start</button>
+    <button class="nav__link" data-route="folge-1" data-goto="#/folge-1">Folge&nbsp;1</button>
+    <button class="nav__link" data-route="folge-2" data-goto="#/folge-2">Folge&nbsp;2</button>
+    <button class="nav__link" data-route="figuren" data-goto="#/figuren">Figuren</button>
+    <button class="nav__link" data-route="ueber"   data-goto="#/ueber">Über</button>
+  </div>
+</nav>
+
+<!-- ============================================================
+     VIEW: HOME
+     ============================================================ -->
+<main>
+<section class="view is-active" id="view-home">
+  <div class="wrap">
+
+    <div class="hero">
+      <span class="hero__kicker">2D-Animationsserie · Staffel 1</span>
+      <h1 class="hero__title">KOBOLD<span class="hero__amp">&amp;</span>KOMET</h1>
+      <p class="hero__tag">Im Flüsterwald, wo der Mond nie ganz schlafen geht, wird aus einem gefallenen Stern die schönste Freundschaft der Nacht.</p>
+
+      <div class="hero__scene" aria-hidden="true">
+        <svg class="hero-pip"><use href="#pip"/></svg>
+        <svg class="hero-fizz"><use href="#fizz"/></svg>
+      </div>
+
+      <button class="hero__cta" data-goto="#/folge-1">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
+        Folge 1 ansehen
+      </button>
+    </div>
+
+    <div class="section">
+      <h2 class="section__title">Die Folgen</h2>
+      <p class="section__sub">Zwei kurze Gute-Nacht-Episoden — direkt im Browser abspielbar.</p>
+      <div class="eps">
+
+        <button class="ep-card" data-goto="#/folge-1">
+          <span class="ep-card__thumb">
+            <span class="thumb-sky thumb-1">
+              <span class="thumb-moon"></span>
+              <span class="thumb-star"></span>
+              <svg class="thumb-mini-pip"><use href="#pip"/></svg>
+            </span>
+            <span class="thumb-hill"></span>
+          </span>
+          <span class="ep-card__body">
+            <span class="ep-card__no">Folge 1</span>
+            <span class="ep-card__title">Der Sternenfall</span>
+            <p class="ep-card__desc">Ein Licht stürzt vom Himmel. Pip findet einen ängstlichen kleinen Kometen — und schenkt ihm zurück, woran er nicht mehr glaubte.</p>
+          </span>
+          <span class="ep-card__play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></span>
+        </button>
+
+        <button class="ep-card" data-goto="#/folge-2">
+          <span class="ep-card__thumb">
+            <span class="thumb-sky thumb-2">
+              <span class="thumb-ff"></span><span class="thumb-ff"></span>
+              <span class="thumb-ff"></span><span class="thumb-ff"></span>
+            </span>
+            <span class="thumb-hill"></span>
+          </span>
+          <span class="ep-card__body">
+            <span class="ep-card__no">Folge 2</span>
+            <span class="ep-card__title">Das Glühwürmchen-Konzert</span>
+            <p class="ep-card__desc">Ein grauer Nebel hat den Lichtern des Waldes den Glanz gestohlen. Pip und Fizz entfachen sie neu — Funke für Funke.</p>
+          </span>
+          <span class="ep-card__play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></span>
+        </button>
+
+        <div class="ep-card soon">
+          <span class="ep-card__badge">Bald</span>
+          <span class="ep-card__thumb"><span class="thumb-sky thumb-1"><span class="thumb-moon"></span></span><span class="thumb-hill"></span></span>
+          <span class="ep-card__body">
+            <span class="ep-card__no">Folge 3</span>
+            <span class="ep-card__title">Der Mondfischer</span>
+            <p class="ep-card__desc">Am Ufer des Sternenteichs trifft Pip einen alten Fischer, der Träume aus dem Wasser zieht.</p>
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section__title">Die Figuren</h2>
+      <p class="section__sub">Ein kleiner Wald voller Herz.</p>
+      <div class="cast">
+        <div class="cast-card">
+          <div class="cast-card__art"><svg class="breathe"><use href="#pip"/></svg></div>
+          <div class="cast-card__name">Pip</div>
+          <div class="cast-card__role">Der Waldkobold</div>
+          <p class="cast-card__desc">Neugierig, mutig, herzlich. Leuchtet selbst nur schwach — sein Herz aber umso heller.</p>
+        </div>
+        <div class="cast-card">
+          <div class="cast-card__art"><svg class="breathe" style="width:90px;height:90px"><use href="#fizz"/></svg></div>
+          <div class="cast-card__name">Fizz</div>
+          <div class="cast-card__role">Der Komet</div>
+          <p class="cast-card__desc">Ein kleiner Stern mit funkelndem Schweif. Anfangs ängstlich, dann herrlich verspielt.</p>
+        </div>
+        <div class="cast-card">
+          <div class="cast-card__art"><svg class="breathe"><use href="#owl"/></svg></div>
+          <div class="cast-card__name">Uhu Ottokar</div>
+          <div class="cast-card__role">Der Waldwächter</div>
+          <p class="cast-card__desc">Der weise Alte mit Brille. Beobachtet, schmunzelt, greift nur selten ein.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     VIEW: FOLGE 1
+     ============================================================ -->
+<section class="view" id="view-folge-1">
+  <div class="player wrap">
+    <div class="player__head">
+      <span class="player__no">Folge 1</span>
+      <h2 class="player__title">Der Sternenfall</h2>
+      <span class="player__back nav__link" data-goto="#/">← Übersicht</span>
+    </div>
+
+    <div class="stage-frame">
+      <div class="stage ep1" id="stage-1" data-scene="0">
+        <div class="scene-inner">
+          <div class="sky-glow"></div>
+          <div class="moon"></div>
+          <div class="star s1"></div><div class="star s2"></div><div class="star s3"></div>
+          <div class="star s4"></div><div class="star s5"></div><div class="star s6"></div><div class="star s7"></div>
+          <div class="hill-far"></div>
+          <div class="hill-near"></div>
+          <div class="tree tree-a"><svg><use href="#tree"/></svg></div>
+          <div class="tree tree-b"><svg><use href="#tree"/></svg></div>
+          <div class="ground"></div>
+          <div class="mushroom"><svg><use href="#mushroom"/></svg></div>
+          <div class="mushroom-window"></div>
+          <div class="crater"></div>
+          <div class="fizz dim">
+            <div class="glow-ring"></div>
+            <svg><use href="#fizz"/></svg>
+          </div>
+          <div class="pip"><svg><use href="#pip"/></svg></div>
+          <div class="heart"><svg><use href="#heart"/></svg></div>
+          <div class="titlecard"><span>Kobold &amp; Komet</span></div>
+          <div class="flash"></div>
+        </div>
+        <div class="subtitle"></div>
+        <div class="ep-end">
+          <p class="ep-end__title">✦ Ende ✦</p>
+          <div class="ep-end__row">
+            <button class="ep-end__btn" data-end="replay">↻ Nochmal</button>
+            <button class="ep-end__btn primary" data-end="next-ep" data-target="#/folge-2">Folge 2 ansehen →</button>
+            <button class="ep-end__btn" data-end="home">Übersicht</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div class="progress"><div class="progress__bar"></div></div>
+      <div class="controls">
+        <button class="ctrl small" data-action="prev" aria-label="Vorherige Szene"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+        <button class="ctrl play" data-action="toggle" aria-label="Abspielen / Pause">
+          <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+        </button>
+        <button class="ctrl small" data-action="next" aria-label="Nächste Szene"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+        <button class="ctrl small" data-action="restart" aria-label="Von vorn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7a5 5 0 11-5 5H5a7 7 0 107-7z"/></svg></button>
+        <span class="scene-count">Szene 0 / 6</span>
+        <span class="hud__spacer"></span>
+        <button class="ctrl small" data-sound-toggle aria-pressed="false" aria-label="Ton umschalten" title="Sanfte Klänge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 5V4L8 9H4z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     VIEW: FOLGE 2
+     ============================================================ -->
+<section class="view" id="view-folge-2">
+  <div class="player wrap">
+    <div class="player__head">
+      <span class="player__no">Folge 2</span>
+      <h2 class="player__title">Das Glühwürmchen-Konzert</h2>
+      <span class="player__back nav__link" data-goto="#/">← Übersicht</span>
+    </div>
+
+    <div class="stage-frame">
+      <div class="stage ep2" id="stage-2" data-scene="0">
+        <div class="scene-inner">
+          <div class="sky-glow"></div>
+          <div class="moon"></div>
+          <div class="hill-far"></div>
+          <div class="hill-near"></div>
+          <div class="tree tree-a"><svg><use href="#tree"/></svg></div>
+          <div class="tree tree-c"><svg><use href="#tree"/></svg></div>
+          <div class="tree tree-b"><svg><use href="#tree"/></svg></div>
+          <div class="ground"></div>
+          <div class="owl"><svg><use href="#owl"/></svg></div>
+
+          <div class="ff ff1"></div><div class="ff ff2"></div><div class="ff ff3"></div>
+          <div class="ff ff4"></div><div class="ff ff5"></div><div class="ff ff6"></div>
+          <div class="ff ff7"></div><div class="ff ff8"></div><div class="ff ff9"></div><div class="ff ff10"></div>
+
+          <div class="note note-a"><svg><use href="#note"/></svg></div>
+          <div class="note note-b"><svg><use href="#note"/></svg></div>
+          <div class="note note-c"><svg><use href="#note"/></svg></div>
+
+          <div class="fog"></div>
+
+          <div class="pip"><svg><use href="#pip"/></svg></div>
+          <div class="fizz bright">
+            <div class="glow-ring"></div>
+            <svg><use href="#fizz"/></svg>
+          </div>
+
+          <div class="titlecard"><span>Das Konzert der Lichter ♪</span></div>
+        </div>
+        <div class="subtitle"></div>
+        <div class="ep-end">
+          <p class="ep-end__title">♪ Ende ♪</p>
+          <div class="ep-end__row">
+            <button class="ep-end__btn" data-end="replay">↻ Nochmal</button>
+            <button class="ep-end__btn primary" data-end="next-ep" data-target="#/">Zur Übersicht →</button>
+            <button class="ep-end__btn" data-end="next-ep" data-target="#/folge-1">Folge 1</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div class="progress"><div class="progress__bar"></div></div>
+      <div class="controls">
+        <button class="ctrl small" data-action="prev" aria-label="Vorherige Szene"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+        <button class="ctrl play" data-action="toggle" aria-label="Abspielen / Pause">
+          <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+        </button>
+        <button class="ctrl small" data-action="next" aria-label="Nächste Szene"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+        <button class="ctrl small" data-action="restart" aria-label="Von vorn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7a5 5 0 11-5 5H5a7 7 0 107-7z"/></svg></button>
+        <span class="scene-count">Szene 0 / 6</span>
+        <span class="hud__spacer"></span>
+        <button class="ctrl small" data-sound-toggle aria-pressed="false" aria-label="Ton umschalten" title="Sanfte Klänge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 5V4L8 9H4z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     VIEW: FIGUREN
+     ============================================================ -->
+<section class="view" id="view-figuren">
+  <div class="wrap">
+    <div class="section">
+      <h2 class="section__title">Die Figuren des Flüsterwaldes</h2>
+      <p class="section__sub">Jede Nacht ein bisschen mehr Licht.</p>
+      <div class="cast">
+        <div class="cast-card">
+          <div class="cast-card__art"><svg class="breathe"><use href="#pip"/></svg></div>
+          <div class="cast-card__name">Pip</div>
+          <div class="cast-card__role">Der Waldkobold</div>
+          <p class="cast-card__desc">Handgroß, mit Blattmütze und großem Herzen. Er glaubt fest daran, dass niemand allein im Dunkeln bleiben muss.</p>
+        </div>
+        <div class="cast-card">
+          <div class="cast-card__art"><svg class="breathe" style="width:90px;height:90px"><use href="#fizz"/></svg></div>
+          <div class="cast-card__name">Fizz</div>
+          <div class="cast-card__role">Der Komet</div>
+          <p class="cast-card__desc">Vom Himmel gefallen und überzeugt, sein Leuchten verloren zu haben. Pip beweist ihm das Gegenteil.</p>
+        </div>
+        <div class="cast-card">
+          <div class="cast-card__art"><svg class="breathe"><use href="#owl"/></svg></div>
+          <div class="cast-card__name">Uhu Ottokar</div>
+          <div class="cast-card__role">Der Waldwächter</div>
+          <p class="cast-card__desc">Sitzt seit jeher auf demselben Ast und hat schon manchen Stern fallen sehen. Er weiß: Die guten Dinge geschehen leise.</p>
+        </div>
+        <div class="cast-card">
+          <div class="cast-card__art"><svg class="breathe" style="width:70px;height:70px"><use href="#fizz-dim"/></svg></div>
+          <div class="cast-card__name">Die Glühwürmchen</div>
+          <div class="cast-card__role">Das Orchester</div>
+          <p class="cast-card__desc">Der leuchtende Schwarm, der den Wald jede Nacht in Musik aus Licht taucht — solange man ihre Funken nicht vergisst.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     VIEW: ÜBER
+     ============================================================ -->
+<section class="view" id="view-ueber">
+  <div class="wrap">
+    <div class="section">
+      <h2 class="section__title">Über die Serie</h2>
+      <p class="section__sub">Kobold &amp; Komet — eine warmherzige Gute-Nacht-Serie.</p>
+
+      <p class="about-quote">„Geteiltes Licht wird nie weniger."</p>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <h3>Die Idee</h3>
+          <p>Eine fast wortlose Serie über Freundschaft, Mut und das Teilen. Getragen von Bewegung, Farbe und Licht statt von Dialog — perfekt für den Moment vor dem Einschlafen.</p>
+        </div>
+        <div class="about-card">
+          <h3>Der Look</h3>
+          <p>Flaches 2D-Vektordesign in tiefem Nachtblau mit warmen Glüh-Akzenten. Weiche Formen, ruhige Kamera, nichts ist hektisch.</p>
+        </div>
+        <div class="about-card">
+          <h3>Die Technik</h3>
+          <p>Alles läuft direkt im Browser — ohne Framework, ohne Installation. SVG-Figuren, CSS-Keyframes pro Szene und eine kleine Szenen-Engine in reinem JavaScript.</p>
+        </div>
+        <div class="about-card">
+          <h3>Bedienung</h3>
+          <p>Jede Folge lässt sich pausieren, Szene für Szene durchsteppen und neu starten. Über das Lautsprecher-Symbol lassen sich optional sanfte Klänge zuschalten.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <p>Ein Flüsterwald-Märchen · <span>Kobold &amp; Komet</span> · Staffel 1</p>
+</footer>
+
+<script src="assets/engine.js"></script>
+</body>
+</html>
