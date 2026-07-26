@@ -1,60 +1,66 @@
-# KOBOLD & KOMET — Serienkonzept
+# STRICHE — Konzept (FSK 18)
 
-> Eine 2D-Animationsserie über eine kleine Waldkreatur und einen verirrten
-> Kometen, die in einer leuchtenden Nacht Freunde fürs Leben werden.
+> Kurze, absurde Sketch-Animationen mit Strichmännchen auf weißem Grund.
+> Ein Gag, ein Twist, meistens ein Todesfall. Dann Cut.
 
 ---
 
 ## 1. Logline
+Eine Welt aus dünnen schwarzen Linien, in der die Physik jederzeit kündigen darf. Jeder Sketch dauert 3–12 Sekunden, endet mit einer absurden Pointe — oft blutig, immer trocken. Kein roter Faden, keine Moral, nur Timing.
 
-Im **Flüsterwald**, wo die Bäume Geheimnisse tuscheln und der Mond nie ganz
-schlafen geht, lebt der kleine Kobold **Pip**. Als eines Nachts der schüchterne
-Komet **Fizz** vom Himmel fällt, beginnt eine Freundschaft, die den ganzen Wald
-zum Leuchten bringt.
+## 2. Ton & Zielgruppe
+- **FSK 18** — Cartoon-Gewalt, Galgenhumor, morbide Absurdität. Comic-Blut (dünne rote Spritzer, nie realistisch), Fluchen, schwarze Ironie.
+- **Regel:** Es ist nur lustig, weil es *nichts ernst nimmt*. Alles ist so simpel gezeichnet, dass die Gewalt sofort albern statt verstörend wirkt. Overkill als Pointe, nie als Schock.
+- **Vorbilder im Geist:** asdfmovie (Timing/Format), Happy Tree Friends (Cartoon-Splatter-Absurdität), Cyanide & Happiness (trockener FSK-18-Humor).
 
-## 2. Ton & Stil
+## 3. Visueller Stil — „Simple Lines"
+- **Figuren:** klassische Strichmännchen — Kreis-Kopf, ein Strich Körper, vier Striche Gliedmaßen. Schwarze Linie, ~4 px, konstante Strichbreite.
+- **Hintergrund:** reines Weiß. Optional eine einzige graue Bodenlinie. Nichts sonst.
+- **Farbe:** alles Schwarz-Weiß — **einzige Ausnahme:** Rot (Blut) und selten Gelb (Feuer). Der Farbtupfer *ist* die Pointe.
+- **Mimik:** minimalistisch — zwei Punktaugen, ein Strichmund. Emotion kommt aus Pose und Timing, nicht aus Details.
+- **Animation:** ruckelig-charmant, ~8–12 fps „on twos", harte Cuts statt weicher Übergänge. Bewegung übertrieben (Squash & Stretch bis zum Reißen).
 
-- **Genre:** Warmherzige Gute-Nacht-Serie, fast wortlos, für alle Altersgruppen.
-- **Look:** Flaches 2D-Vektordesign, tiefes Nachtblau, warme Glüh-Akzente,
-  weiche Formen. Alles bewegt sich sanft — nichts ist hektisch.
-- **Erzählweise:** Kurze, ruhige Episoden (~30 Sekunden), getragen von Licht,
-  Bewegung und knappen poetischen Untertiteln statt Dialog.
-- **Leitmotiv:** *„Geteiltes Licht wird nie weniger."*
+## 4. Seitenlayout (falls Web-Umsetzung)
+So simpel wie der Stil selbst:
+- Weiße Seite, oben ein dünner schwarzer Trennstrich, darunter der Titel **STRICHE** in fetter Grotesk.
+- Ein einzelner weißer Kasten mit schwarzem 4-px-Rahmen = die „Bühne".
+- Darunter drei Textlinks in einer Reihe: `‹ zurück · abspielen · weiter ›` — reine Linien, keine Buttons, keine Schatten.
+- Ein FSK-18-Badge (roter Kreis mit „18") oben rechts.
+- Keine Farben außer Schwarz auf Weiß + der eine rote Akzent. Das Layout „ist" der Zeichenstil.
 
-## 3. Figuren
+## 5. Format
+- **Sketch-Serie:** jede „Folge" = eine Kette aus 6–10 Mini-Gags hintereinander, getrennt durch harte Weißblenden.
+- **Länge:** Folge ~60–90 Sekunden.
+- **Running Gags:** ein wiederkehrender Idiot („Kevin"), der jeden Sketch anders stirbt; ein Muffin, der spricht (Hommage/Persiflage); der „Nein."-Typ, der als einziger Vernunft hat und dafür bestraft wird.
 
-| Figur | Beschreibung |
-|-------|--------------|
-| **Pip** | Ein handgroßer Waldkobold mit Blattmütze. Neugierig, mutig, herzlich. Leuchtet selbst nur schwach — sein Herz aber umso heller. |
-| **Fizz** | Ein kleiner Komet mit funkelndem Schweif. Anfangs ängstlich, weil er seinen Glanz verloren glaubt. Verspielt, sobald er sich sicher fühlt. |
-| **Uhu Ottokar** | Der weise alte Waldwächter mit Brille. Beobachtet, schmunzelt, greift selten ein. |
-| **Die Glühwürmchen** | Ein ganzer Schwarm kleiner Lichter — das Orchester des Waldes. |
+## 6. Figuren (alles Striche)
 
-## 4. Welt — Der Flüsterwald
+| Figur | Rolle |
+|-------|-------|
+| **Kevin** | Der ewige Verlierer. Stirbt in jedem Sketch anders — Aufzug, Toaster, eigene Dummheit. Ist in der nächsten Szene wieder da, kommentarlos. |
+| **Der Vernünftige** | Sagt trocken „Nein." Wird trotzdem überfahren. |
+| **Sprech-Muffin** | Redet fröhlich, während alles um ihn herum eskaliert. |
+| **Sensenmann-Strich** | Nur ein Strich mit Sense. Immer zwei Frames zu spät. |
 
-Ein ewiger Wald in der blauen Stunde zwischen Abend und Nacht. Pilzhäuser,
-uralte Bäume, ein wacher Mond. Licht ist hier eine Währung der Zuneigung:
-Wer teilt, leuchtet heller.
+## 7. Beispiel-Sketches (Ton der Pointen)
+Alle Gewalt cartoonhaft, absurd, nie realistisch — der Witz ist das *Timing*, nicht das Blut.
 
-## 5. Staffel 1 — Episodenübersicht
+1. **„Highfive"** — Zwei Striche wollen abklatschen. Beim Zusammenschlagen der Hände explodieren beide Arme. Sie schauen sich an. *„…lohnt sich nie."* Cut.
+2. **„Anleitung"** — Ein Strich liest ein Schild: „Nicht den roten Knopf." Er drückt ihn. Der ganze Bildschirm wird für einen Frame rot. Weiß. Muffin: *„Hab's ihm gesagt."*
+3. **„Diät"** — Kevin steht auf der Waage. Die Waage zeigt „NEIN". Der Boden verschluckt ihn. Sensenmann kommt einen Frame zu spät und zuckt mit den Schultern.
+4. **„Umarmung"** — Zwei Striche umarmen sich innig. Sie verheddern ihre Linien zu einem Knoten und lösen sich in einen Strichhaufen auf. Herz-Symbol poppt auf. Cut.
+5. **„Der Vernünftige"** — Alle rennen auf eine Klippe zu. Er sagt „Nein." — bleibt stehen. Ein Klavier fällt nur auf ihn.
 
-1. **Der Sternenfall** — Fizz stürzt in den Wald; Pip findet ihn und schenkt
-   ihm zurück, woran er nicht mehr glaubte: sein Leuchten. *(fertig)*
-2. **Das Glühwürmchen-Konzert** — Ein grauer Nebel hat den Lichtern des Waldes
-   den Glanz gestohlen. Pip und Fizz entfachen sie neu — Funke für Funke. *(fertig)*
-3. *Der Mondfischer* — geplant
-4. *Wohin die Sterne gehen* — geplant
+## 8. Struktur einer Folge
+`Titelblende (STRICHE, 1 Sek)` → `Gag 1` → *weiß* → `Gag 2` → *weiß* → … → `Endgag mit Kevin` → `schwarzer Cut + Herz/Blutspritzer als Logo`.
 
-## 6. Technik
+## 9. Technik (falls gebaut)
+- Reines SVG: Figuren = ein paar `<line>`/`<circle>`-Elemente, per CSS-Keyframes bewegt.
+- „Blut" = rote SVG-Spritzer, die für 2–3 Frames eingeblendet und weggecuttet werden.
+- On-twos-Ruckeln über `steps()`-Timing statt weicher Easing-Kurven.
+- Harte Weißblenden zwischen Gags über kurze `opacity`-Cuts.
+- FSK-18-Gate: Startscreen mit „18+ — enthält absurde Cartoon-Gewalt · Weiter / Zurück".
 
-Die Serie läuft vollständig im Browser — **ohne Framework, ohne Build, ohne
-externe Dateien**:
+---
 
-- **`index.html`** ist die Serie: Start-Hub *und* Abspieler für beide Folgen.
-- **SVG-Figuren** als wiederverwendbare Symbole.
-- **CSS-Keyframes** pro Szene, gesteuert über ein `data-scene`-Attribut.
-- **`assets/engine.js`** — eine kleine Szenen-Engine (Timeline, Untertitel,
-  Play/Pause, Szenensprung, Fortschritt) und ein Hash-Router.
-- Respektiert `prefers-reduced-motion` und passt sich Hell-/Dunkelmodus an.
-
-Einfach `index.html` im Browser öffnen — fertig.
+**Leitmotiv:** *„Ein Strich, ein Gag, ein Grab."*
