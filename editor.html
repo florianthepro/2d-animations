@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STRICHE — Sketch-Editor</title>
+<style>
+  :root { --ink:#111; --blood:#e0122b; --line:#e5e5e5; --panel:#fafafa; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:var(--ink); background:#fff; }
+  body { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+
+  .toolbar { display:flex; align-items:center; gap:14px; padding:8px 14px; border-bottom:3px solid var(--ink); flex:none; }
+  .toolbar .brand { font-weight:900; font-size:20px; letter-spacing:-.03em; }
+  .toolbar button, .toolbar label.btn { font:inherit; font-weight:700; border:none; background:none; cursor:pointer; color:var(--ink); padding:4px 6px; }
+  .toolbar button:hover { color:var(--blood); }
+  .toolbar .sep { width:1px; height:20px; background:var(--line); }
+  .toolbar input[type=text] { font:inherit; border:none; border-bottom:2px solid var(--line); padding:2px 4px; }
+  .toolbar input[type=number] { width:52px; font:inherit; border:1px solid var(--line); padding:2px 4px; }
+  .toolbar .spacer { flex:1; }
+  .toggle { display:inline-flex; align-items:center; gap:6px; font-weight:700; cursor:pointer; }
+  .toggle .dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--ink); }
+  .toggle.on .dot { background:var(--blood); border-color:var(--blood); }
+
+  .main { flex:1; display:grid; grid-template-columns:200px 1fr 250px; min-height:0; }
+  .panel { border-right:1px solid var(--line); overflow:auto; padding:10px; }
+  .panel.right { border-right:none; border-left:1px solid var(--line); }
+  .panel h3 { font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:#999; margin:14px 0 6px; }
+  .panel h3:first-child { margin-top:0; }
+
+  .add-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+  .add-grid button { font:inherit; font-size:12px; font-weight:700; border:1px solid var(--line); background:#fff; border-radius:5px; padding:6px 4px; cursor:pointer; }
+  .add-grid button:hover { border-color:var(--blood); color:var(--blood); }
+
+  .objlist { list-style:none; margin:0; padding:0; }
+  .objlist li { display:flex; align-items:center; gap:4px; padding:5px 6px; border-radius:5px; cursor:pointer; font-size:13px; }
+  .objlist li.sel { background:var(--blood); color:#fff; }
+  .objlist li .nm { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .objlist li button { border:none; background:none; cursor:pointer; color:inherit; font-size:12px; opacity:.7; }
+  .objlist li button:hover { opacity:1; }
+
+  .stagewrap { position:relative; display:flex; align-items:center; justify-content:center; background:#f4f4f4; min-height:0; padding:16px; }
+  .stagebox { position:relative; width:100%; max-width:760px; aspect-ratio:16/9; background:#fff; border:3px solid var(--ink); }
+  #stage { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #stage line, #stage circle, #stage path, #stage ellipse, #stage rect { stroke-width:4; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+  #stage .sk-head { fill:#fff; } #stage .sk-dot { fill:var(--ink); stroke:none; } #stage text { font-weight:900; }
+  .selbox { position:absolute; border:1.5px dashed var(--blood); pointer-events:none; display:none; }
+
+  .prop { margin-bottom:7px; }
+  .prop label { display:block; font-size:11px; color:#888; margin-bottom:2px; }
+  .prop input, .prop select { width:100%; font:inherit; font-size:13px; border:1px solid var(--line); padding:3px 5px; border-radius:4px; }
+  .chan { display:grid; grid-template-columns:52px 1fr auto auto; gap:4px; align-items:center; margin-bottom:4px; }
+  .chan .cname { font-size:11px; color:#888; }
+  .chan input.val { font:inherit; font-size:12px; border:1px solid var(--line); padding:2px 4px; border-radius:4px; width:100%; }
+  .chan input.val.haskey { border-color:var(--blood); }
+  .chan button.key { border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px; padding:2px 5px; }
+  .chan button.key:hover { border-color:var(--blood); color:var(--blood); }
+  .chan select.ez { font-size:10px; border:1px solid var(--line); border-radius:4px; padding:1px; max-width:76px; }
+
+  .timeline { flex:none; height:190px; border-top:3px solid var(--ink); display:flex; flex-direction:column; background:var(--panel); }
+  .tl-top { display:flex; align-items:center; gap:12px; padding:6px 12px; border-bottom:1px solid var(--line); }
+  .tl-top button { font:inherit; font-weight:700; border:none; background:none; cursor:pointer; }
+  .tl-top button:hover { color:var(--blood); }
+  .tl-body { flex:1; position:relative; overflow:auto; }
+  .ruler { position:relative; height:22px; border-bottom:1px solid var(--line); background:#fff; cursor:pointer; user-select:none; }
+  .ruler .tick { position:absolute; top:0; height:100%; border-left:1px solid var(--line); font-size:9px; color:#aaa; padding-left:2px; }
+  .trackrow { position:relative; height:22px; border-bottom:1px solid #f0f0f0; }
+  .trackrow .lbl { position:absolute; left:0; top:0; width:56px; height:100%; font-size:10px; color:#888; display:flex; align-items:center; padding-left:6px; background:var(--panel); z-index:2; border-right:1px solid var(--line); }
+  .trackrow .track { position:absolute; left:56px; right:0; top:0; height:100%; }
+  .kf { position:absolute; top:50%; width:11px; height:11px; margin-left:-5.5px; margin-top:-5.5px; background:#fff; border:2px solid var(--ink); transform:rotate(45deg); cursor:ew-resize; }
+  .kf.sel { background:var(--blood); border-color:var(--blood); }
+  .playhead { position:absolute; top:0; bottom:0; width:2px; background:var(--blood); z-index:5; pointer-events:none; }
+  .empty { color:#bbb; font-size:12px; padding:14px; }
+  .hint { font-size:11px; color:#aaa; padding:2px 12px; }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <span class="brand">STRICHE · Editor</span>
+    <button id="btnNew">Neu</button>
+    <label class="btn" style="cursor:pointer;">Import<input type="file" id="imp" accept=".2dsk,.json" style="display:none;"></label>
+    <button id="btnExport">Export .2dsk</button>
+    <div class="sep"></div>
+    <button id="btnPlay">▶ Play</button>
+    <span class="sep"></span>
+    <label style="font-size:12px;color:#888;">Titel</label>
+    <input type="text" id="title" value="Neuer Sketch">
+    <label style="font-size:12px;color:#888;">Dauer</label>
+    <input type="number" id="dur" min="0.5" max="60" step="0.5" value="5">
+    <div class="spacer"></div>
+    <div class="toggle on" id="autokey"><span class="dot"></span>Auto-Key</div>
+    <a href="player.html" style="color:#888;font-weight:700;text-decoration:none;">→ Player</a>
+  </div>
+
+  <div class="main">
+    <div class="panel">
+      <h3>Hinzufügen</h3>
+      <div class="add-grid" id="addGrid"></div>
+      <h3>Objekte</h3>
+      <ul class="objlist" id="objlist"></ul>
+    </div>
+
+    <div class="stagewrap">
+      <div class="stagebox" id="stagebox">
+        <svg id="stage" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="selbox" id="selbox"></div>
+      </div>
+    </div>
+
+    <div class="panel right" id="props">
+      <p class="empty">Kein Objekt gewählt.</p>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-top">
+      <button id="btnPlay2">▶</button>
+      <span id="timeread" style="font-weight:700;color:#888;">0.00s</span>
+      <span class="hint">Doppelklick auf eine Spur = Keyframe · Klick auf Raute = wählen · Entf = löschen</span>
+    </div>
+    <div class="tl-body">
+      <div class="ruler" id="ruler"></div>
+      <div id="tracks"></div>
+      <div class="playhead" id="playhead" style="left:56px;"></div>
+    </div>
+  </div>
+
+<script src="sketch-engine.js"></script>
+<script>
+(function(){
+  const E = SketchEngine;
+  const svg = document.getElementById('stage');
+  const renderer = new E.Renderer(svg);
+  let doc = E.defaultDoc();
+  let time = 0, selId = null, selKey = null, autoKey = true, playing = false, raf = null, last = 0;
+
+  const CH_COMMON = ['x','y','rot','sx','sy','op'];
+  const CH_STICK = ['armL','armR','legL','legR'];
+  const LABEL = { x:'X', y:'Y', rot:'Dreh°', sx:'Breite', sy:'Höhe', op:'Deckk.', armL:'Arm L', armR:'Arm R', legL:'Bein L', legR:'Bein R' };
+
+  function sel(){ return doc.objects.find(o=>o.id===selId) || null; }
+  function chansFor(o){ return o.type==='stickman' ? CH_COMMON.concat(CH_STICK) : CH_COMMON; }
+
+  /* ---------- Keyframe-Helfer ---------- */
+  function setKey(o, ch, t, v, e){
+    o.keys[ch] = o.keys[ch] || [];
+    const arr = o.keys[ch];
+    const hit = arr.find(k=>Math.abs(k.t-t)<1e-3);
+    if(hit){ hit.v=v; if(e) hit.e=e; }
+    else arr.push({ t:+t.toFixed(3), v, e: e||'ease-in-out' });
+    arr.sort((a,b)=>a.t-b.t);
+  }
+  function setBase(o, ch, v){ o.props[ch === 'x' ? 'x' : ch] = v; }
+  function editChannel(o, ch, v){
+    if(autoKey) setKey(o, ch, time, v, easeAtOrBefore(o,ch,time));
+    else { if(o.keys[ch] && o.keys[ch].length) setKey(o, ch, time, v); else setBase(o, ch, v); }
+  }
+  function easeAtOrBefore(o,ch,t){
+    const arr=o.keys[ch]; if(!arr) return 'ease-in-out';
+    let e='ease-in-out';
+    for(const k of arr){ if(k.t<=t+1e-3) e=k.e; }
+    return e;
+  }
+
+  /* ---------- Render ---------- */
+  function rebuild(){ renderer.load(doc); renderer.render(time); drawSel(); }
+  function refresh(){ renderer.render(time); drawSel(); }
+  function drawSel(){
+    const box = document.getElementById('selbox');
+    const o = sel();
+    if(!o){ box.style.display='none'; return; }
+    const h = renderer.handleFor(o.id);
+    if(!h){ box.style.display='none'; return; }
+    const gr = h.g.getBoundingClientRect();
+    const cr = document.getElementById('stagebox').getBoundingClientRect();
+    if(gr.width<1 && gr.height<1){ box.style.display='none'; return; }
+    box.style.display='block';
+    box.style.left = (gr.left-cr.left-4)+'px';
+    box.style.top = (gr.top-cr.top-4)+'px';
+    box.style.width = (gr.width+8)+'px';
+    box.style.height = (gr.height+8)+'px';
+  }
+
+  /* ---------- Objektliste ---------- */
+  function renderList(){
+    const ul = document.getElementById('objlist'); ul.innerHTML='';
+    doc.objects.forEach((o,i)=>{
+      const li=document.createElement('li'); if(o.id===selId) li.className='sel';
+      li.innerHTML = `<span class="nm">${o.type}</span>
+        <button title="hoch" data-a="up">▲</button>
+        <button title="runter" data-a="dn">▼</button>
+        <button title="löschen" data-a="del">✕</button>`;
+      li.querySelector('.nm').onclick = ()=>{ selId=o.id; selKey=null; renderAll(); };
+      li.onclick = (e)=>{ if(e.target.tagName!=='BUTTON'){ selId=o.id; selKey=null; renderAll(); } };
+      li.querySelectorAll('button').forEach(b=> b.onclick=(e)=>{ e.stopPropagation();
+        const a=b.dataset.a;
+        if(a==='del'){ doc.objects.splice(i,1); if(selId===o.id) selId=null; }
+        if(a==='up' && i>0){ doc.objects.splice(i-1,0,doc.objects.splice(i,1)[0]); }
+        if(a==='dn' && i<doc.objects.length-1){ doc.objects.splice(i+1,0,doc.objects.splice(i,1)[0]); }
+        rebuild(); renderAll();
+      });
+      ul.appendChild(li);
+    });
+  }
+
+  /* ---------- Eigenschaften ---------- */
+  function renderProps(){
+    const el = document.getElementById('props');
+    const o = sel();
+    if(!o){ el.innerHTML='<p class="empty">Kein Objekt gewählt.</p>'; return; }
+    let html = `<h3>${o.type}</h3>`;
+    const p = o.props;
+    const inp = (label,id,val,type)=>`<div class="prop"><label>${label}</label><input id="${id}" type="${type||'text'}" value="${val==null?'':val}"></div>`;
+    const selBox=(label,id,val,opts)=>`<div class="prop"><label>${label}</label><select id="${id}">${opts.map(x=>`<option ${x===val?'selected':''}>${x}</option>`).join('')}</select></div>`;
+    if(o.type==='text'){ html+=inp('Text','p_text',p.text); html+=inp('Größe','p_size',p.size||24,'number'); html+=`<div class="prop"><label>Farbe</label><input id="p_fill" type="color" value="${p.fill||'#111111'}"></div>`; }
+    if(o.type==='stickman'){ html+=selBox('Augen','p_eyes',p.eyes||'dots',['dots','x','none']); html+=selBox('Mund','p_mouth',p.mouth||'line',['line','smile','frown','o','none']); html+=`<div class="prop"><label>Farbe</label><input id="p_stroke" type="color" value="${p.stroke||'#111111'}"></div>`; }
+    if(o.type==='splat'){ html+=inp('Radius','p_r',p.r||40,'number'); html+=inp('Spitzen','p_n',p.n||12,'number'); html+=`<div class="prop"><label>Farbe</label><input id="p_color" type="color" value="${p.color||'#e0122b'}"></div>`; }
+    if(o.type==='line'){ html+=inp('x1','p_x1',p.x1||0,'number')+inp('y1','p_y1',p.y1||0,'number')+inp('x2','p_x2',p.x2==null?40:p.x2,'number')+inp('y2','p_y2',p.y2||0,'number'); html+=`<div class="prop"><label>Farbe</label><input id="p_stroke" type="color" value="${p.stroke||'#111111'}"></div>`; }
+    if(o.type==='circle'){ html+=inp('r','p_r',p.r==null?20:p.r,'number'); html+=`<div class="prop"><label>Kontur</label><input id="p_stroke" type="color" value="${p.stroke||'#111111'}"></div><div class="prop"><label>Füllung</label><input id="p_fill" type="text" value="${p.fill||'none'}"></div>`; }
+    if(o.type==='rect'){ html+=inp('Breite','p_w',p.w||60,'number')+inp('Höhe','p_h',p.h||40,'number')+inp('Radius','p_rx',p.rx||0,'number'); html+=`<div class="prop"><label>Kontur</label><input id="p_stroke" type="color" value="${p.stroke||'#111111'}"></div>`; }
+
+    html += `<h3>Animation @ ${time.toFixed(2)}s</h3>`;
+    chansFor(o).forEach(ch=>{
+      const v = E.channelValue(o, ch, time);
+      const has = o.keys[ch] && o.keys[ch].length;
+      html += `<div class="chan">
+        <span class="cname">${LABEL[ch]}</span>
+        <input class="val ${has?'haskey':''}" data-ch="${ch}" value="${(+v).toFixed(1)}">
+        <button class="key" data-ch="${ch}" title="Keyframe setzen">◆</button>
+        <select class="ez" data-ch="${ch}">${E.EASING_NAMES.map(n=>`<option ${n===easeAtOrBefore(o,ch,time)?'selected':''}>${n}</option>`).join('')}</select>
+      </div>`;
+    });
+    el.innerHTML = html;
+
+    // static bindings
+    const bindStatic=(id,fn)=>{ const e=document.getElementById(id); if(e){ e.onchange=()=>{ fn(e.value); rebuild(); renderProps(); }; e.oninput=()=>{ fn(e.value); rebuild(); }; } };
+    bindStatic('p_text',v=>p.text=v); bindStatic('p_size',v=>p.size=+v);
+    bindStatic('p_fill',v=>p.fill=v); bindStatic('p_stroke',v=>p.stroke=v); bindStatic('p_color',v=>p.color=v);
+    bindStatic('p_eyes',v=>p.eyes=v); bindStatic('p_mouth',v=>p.mouth=v);
+    bindStatic('p_r',v=>p.r=+v); bindStatic('p_n',v=>p.n=+v);
+    bindStatic('p_x1',v=>p.x1=+v); bindStatic('p_y1',v=>p.y1=+v); bindStatic('p_x2',v=>p.x2=+v); bindStatic('p_y2',v=>p.y2=+v);
+    bindStatic('p_w',v=>p.w=+v); bindStatic('p_h',v=>p.h=+v); bindStatic('p_rx',v=>p.rx=+v);
+
+    el.querySelectorAll('input.val').forEach(i=> i.onchange=()=>{ editChannel(o, i.dataset.ch, +i.value); rebuild(); renderTracks(); renderProps(); });
+    el.querySelectorAll('button.key').forEach(b=> b.onclick=()=>{ const ch=b.dataset.ch; setKey(o,ch,time,E.channelValue(o,ch,time),easeAtOrBefore(o,ch,time)); renderTracks(); renderProps(); });
+    el.querySelectorAll('select.ez').forEach(s=> s.onchange=()=>{ const ch=s.dataset.ch; const arr=o.keys[ch]; if(arr){ let target=null; for(const k of arr){ if(k.t<=time+1e-3) target=k; } if(target){ target.e=s.value; refresh(); } } });
+  }
+
+  /* ---------- Timeline ---------- */
+  function trackWidth(){ return document.getElementById('ruler').clientWidth - 56; }
+  function t2x(t){ return 56 + (t/doc.duration)*trackWidth(); }
+  function x2t(x){ return Math.max(0, Math.min(doc.duration, ((x-56)/trackWidth())*doc.duration)); }
+
+  function renderRuler(){
+    const r = document.getElementById('ruler'); r.innerHTML='';
+    const w = trackWidth(); const step = doc.duration<=6?0.5:1;
+    for(let t=0;t<=doc.duration+1e-6;t+=step){
+      const d=document.createElement('div'); d.className='tick'; d.style.left=t2x(t)+'px'; d.textContent=t.toFixed(step<1?1:0)+'s'; r.appendChild(d);
+    }
+  }
+  function renderTracks(){
+    const c = document.getElementById('tracks'); c.innerHTML='';
+    const o = sel();
+    if(!o){ c.innerHTML='<div class="empty">Objekt wählen, um Keyframes zu sehen.</div>'; positionPlayhead(); return; }
+    chansFor(o).forEach(ch=>{
+      const arr = o.keys[ch];
+      if(!arr || !arr.length) return;
+      const row=document.createElement('div'); row.className='trackrow';
+      row.innerHTML=`<div class="lbl">${LABEL[ch]}</div><div class="track" data-ch="${ch}"></div>`;
+      const track=row.querySelector('.track');
+      track.ondblclick=(e)=>{ const rect=track.getBoundingClientRect(); const t=x2t(56 + e.clientX-rect.left); setKey(o,ch,t,E.channelValue(o,ch,t)); renderTracks(); renderProps(); };
+      arr.forEach((k,idx)=>{
+        const dot=document.createElement('div'); dot.className='kf'+((selKey&&selKey.id===o.id&&selKey.ch===ch&&selKey.idx===idx)?' sel':'');
+        dot.style.left=(t2x(k.t)-56)+'px';
+        dot.onpointerdown=(e)=>{ e.preventDefault(); e.stopPropagation(); selKey={id:o.id,ch,idx}; renderTracks();
+          const move=(ev)=>{ const rect=document.getElementById('ruler').getBoundingClientRect(); k.t=+x2t(ev.clientX-rect.left).toFixed(3); dot.style.left=(t2x(k.t)-56)+'px'; refresh(); };
+          const up=()=>{ document.removeEventListener('pointermove',move); document.removeEventListener('pointerup',up); o.keys[ch].sort((a,b)=>a.t-b.t); renderTracks(); renderProps(); };
+          document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
+        };
+        track.appendChild(dot);
+      });
+      c.appendChild(row);
+    });
+    if(!c.children.length) c.innerHTML='<div class="empty">Noch keine Keyframes. Wert ändern oder ◆ drücken.</div>';
+    positionPlayhead();
+  }
+  function positionPlayhead(){ document.getElementById('playhead').style.left = t2x(time)+'px'; }
+
+  // Ruler scrub
+  (function(){
+    const r=document.getElementById('ruler');
+    const scrub=(e)=>{ const rect=r.getBoundingClientRect(); setTime(x2t(e.clientX-rect.left)); };
+    r.onpointerdown=(e)=>{ pause(); scrub(e); const mv=(ev)=>scrub(ev); const up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);}; document.addEventListener('pointermove',mv); document.addEventListener('pointerup',up); };
+  })();
+
+  function setTime(t){ time=Math.max(0,Math.min(doc.duration,t)); refresh(); positionPlayhead(); document.getElementById('timeread').textContent=time.toFixed(2)+'s'; renderProps(); }
+
+  /* ---------- Canvas Drag ---------- */
+  svg.addEventListener('pointerdown',(e)=>{
+    const g = e.target.closest('[data-id]');
+    if(!g){ return; }
+    const id = g.getAttribute('data-id'); selId=id; selKey=null; renderAll();
+    const o = sel(); if(!o) return;
+    const rect = svg.getBoundingClientRect();
+    const sxr = doc.viewBox[2]/rect.width, syr = doc.viewBox[3]/rect.height;
+    const startX=e.clientX, startY=e.clientY;
+    const bx = E.channelValue(o,'x',time), by = E.channelValue(o,'y',time);
+    const move=(ev)=>{ const nx=bx+(ev.clientX-startX)*sxr, ny=by+(ev.clientY-startY)*syr; editChannel(o,'x',+nx.toFixed(1)); editChannel(o,'y',+ny.toFixed(1)); refresh(); };
+    const up=()=>{ document.removeEventListener('pointermove',move); document.removeEventListener('pointerup',up); renderTracks(); renderProps(); };
+    document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
+  });
+
+  /* ---------- Play ---------- */
+  function loop(now){ if(!playing) return; const dt=(now-last)/1000; last=now; let nt=time+dt; if(nt>=doc.duration) nt=0; setTime(nt); raf=requestAnimationFrame(loop); }
+  function play(){ playing=true; document.getElementById('btnPlay').textContent='❚❚ Pause'; document.getElementById('btnPlay2').textContent='❚❚'; last=performance.now(); raf=requestAnimationFrame(loop); }
+  function pause(){ playing=false; document.getElementById('btnPlay').textContent='▶ Play'; document.getElementById('btnPlay2').textContent='▶'; if(raf)cancelAnimationFrame(raf); }
+  document.getElementById('btnPlay').onclick=()=>playing?pause():play();
+  document.getElementById('btnPlay2').onclick=()=>playing?pause():play();
+
+  /* ---------- Add / Toolbar ---------- */
+  function buildAddGrid(){
+    const g=document.getElementById('addGrid'); g.innerHTML='';
+    E.PRESET_LIST.forEach(pr=>{ const b=document.createElement('button'); b.textContent=pr.label; b.onclick=()=>{ const o=E.makePreset(pr.key, 400, pr.key==='strichmann'?341:225); doc.objects.push(o); selId=o.id; selKey=null; rebuild(); renderAll(); }; g.appendChild(b); });
+  }
+  document.getElementById('autokey').onclick=function(){ autoKey=!autoKey; this.classList.toggle('on',autoKey); };
+  document.getElementById('title').oninput=function(){ doc.title=this.value; };
+  document.getElementById('dur').onchange=function(){ doc.duration=Math.max(0.5,+this.value||5); renderRuler(); renderTracks(); positionPlayhead(); };
+  document.getElementById('btnNew').onclick=()=>{ if(confirm('Neuen Sketch anlegen? Nicht gespeicherte Änderungen gehen verloren.')){ doc=E.defaultDoc(); time=0; selId=null; selKey=null; document.getElementById('title').value=doc.title; document.getElementById('dur').value=doc.duration; rebuild(); renderAll(); } };
+  document.getElementById('btnExport').onclick=()=>{
+    doc.objects.forEach(o=>{ for(const ch in o.keys) if(o.keys[ch]) o.keys[ch].sort((a,b)=>a.t-b.t); });
+    const blob=new Blob([JSON.stringify(doc,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(doc.title||'sketch').replace(/\s+/g,'_')+'.2dsk'; a.click();
+  };
+  document.getElementById('imp').onchange=function(){ const f=this.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ try{ doc=E.validate(JSON.parse(r.result)); time=0; selId=null; selKey=null; document.getElementById('title').value=doc.title||''; document.getElementById('dur').value=doc.duration; rebuild(); renderAll(); }catch(err){ alert('Import fehlgeschlagen: '+err.message); } }; r.readAsText(f); this.value=''; };
+
+  /* ---------- Keyboard ---------- */
+  document.addEventListener('keydown',(e)=>{
+    if(/input|select|textarea/i.test(document.activeElement.tagName)) return;
+    if(e.key===' '){ e.preventDefault(); playing?pause():play(); }
+    else if(e.key==='ArrowLeft'){ setTime(time-0.05); }
+    else if(e.key==='ArrowRight'){ setTime(time+0.05); }
+    else if(e.key==='Delete'||e.key==='Backspace'){
+      if(selKey){ const o=doc.objects.find(x=>x.id===selKey.id); if(o&&o.keys[selKey.ch]){ o.keys[selKey.ch].splice(selKey.idx,1); if(!o.keys[selKey.ch].length) delete o.keys[selKey.ch]; selKey=null; rebuild(); renderTracks(); renderProps(); } }
+      else if(selId){ const i=doc.objects.findIndex(x=>x.id===selId); if(i>=0){ doc.objects.splice(i,1); selId=null; rebuild(); renderAll(); } }
+    }
+  });
+
+  function renderAll(){ renderList(); renderProps(); renderTracks(); drawSel(); }
+
+  // Init
+  buildAddGrid();
+  rebuild(); renderRuler(); renderAll(); positionPlayhead();
+  window.addEventListener('resize', ()=>{ renderRuler(); renderTracks(); positionPlayhead(); drawSel(); });
+
+  // Test-Hook
+  window.__editor = { getDoc:()=>doc, load:(d)=>{ doc=E.validate(d); selId=null; selKey=null; time=0; document.getElementById('title').value=doc.title||''; document.getElementById('dur').value=doc.duration; rebuild(); renderAll(); }, setTime };
+})();
+</script>
+</body>
+</html>
