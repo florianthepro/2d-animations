@@ -173,6 +173,17 @@ html, body {
 .controls button:hover { color: var(--blood); }
 .controls button:disabled { color: #ccc; cursor: default; }
 
+.tools {
+  margin-top: 34px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #bbb;
+}
+.tools a { color: #999; text-decoration: none; border-bottom: 2px solid #ddd; padding-bottom: 1px; }
+.tools a:hover { color: var(--blood); border-color: var(--blood); }
+.tools span { margin: 0 10px; }
+
 /* ---------- SVG-Strichoptik ---------- */
 .stage svg line,
 .stage svg circle,

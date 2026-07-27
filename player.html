@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STRICHE — Player (.2dsk)</title>
+<style>
+  :root { --ink:#111; --blood:#e0122b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#fff; color:var(--ink);
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; }
+  .wrap { max-width:900px; margin:0 auto; padding:0 24px 60px; }
+  .topbar { border-bottom:4px solid var(--ink); padding:22px 0 14px; display:flex; align-items:baseline; }
+  .brand { font-size:clamp(30px,6vw,52px); font-weight:900; letter-spacing:-.04em; margin:0; }
+  .brand__tag { margin-left:14px; font-size:12px; font-weight:700; letter-spacing:.15em; color:#888; text-transform:uppercase; }
+  .stage { position:relative; border:4px solid var(--ink); background:#fff; aspect-ratio:16/9; margin-top:24px; overflow:hidden; }
+  .stage svg { display:block; width:100%; height:100%; }
+  .stage svg line, .stage svg circle, .stage svg path, .stage svg ellipse, .stage svg rect {
+    stroke-width:4; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+  .stage svg .sk-head { fill:#fff; }
+  .stage svg .sk-dot { fill:var(--ink); stroke:none; }
+  .stage svg text { font-weight:900; }
+  .drop { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px; text-align:center; color:#999; background:#fff; }
+  .drop.hide { display:none; }
+  .drop strong { color:var(--ink); font-size:20px; }
+  .controls { margin-top:18px; display:flex; align-items:center; gap:20px; font-weight:700; }
+  .controls button { background:none; border:none; font:inherit; font-weight:700; color:var(--ink); cursor:pointer; }
+  .controls button:hover { color:var(--blood); }
+  .controls .title { margin-left:auto; color:#888; font-weight:700; }
+  input[type=range] { flex:1; accent-color:var(--blood); }
+  .filebtn { border-bottom:3px solid var(--ink); cursor:pointer; padding-bottom:1px; }
+  .filebtn:hover { color:var(--blood); border-color:var(--blood); }
+  a.editlink { color:#888; text-decoration:none; border-bottom:2px solid #ccc; }
+  a.editlink:hover { color:var(--blood); border-color:var(--blood); }
+  .hint { margin-top:26px; color:#aaa; font-size:13px; text-align:center; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1 class="brand">STRICHE</h1>
+      <span class="brand__tag">Player · .2dsk</span>
+    </div>
+
+    <div class="stage">
+      <svg id="stage" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="drop" id="drop">
+        <strong>.2dsk hierher ziehen</strong>
+        <span>oder <span class="filebtn" id="pick">Datei wählen</span></span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="play">▶ abspielen</button>
+      <button id="restart">↺ neu</button>
+      <input type="range" id="scrub" min="0" max="1000" value="0">
+      <span class="title" id="title"></span>
+    </div>
+    <div class="controls">
+      <span class="filebtn" id="pick2">.2dsk laden</span>
+      <span id="time" style="color:#888;">0.0s</span>
+      <a class="editlink" href="editor.html" style="margin-left:auto;">→ Editor öffnen</a>
+    </div>
+
+    <p class="hint">Erstelle eigene Sketche im <a class="editlink" href="editor.html">Editor</a> und lade die exportierte <code>.2dsk</code> hier hoch.</p>
+    <input type="file" id="file" accept=".2dsk,.json,application/json" style="display:none;">
+  </div>
+
+<script src="sketch-engine.js"></script>
+<script>
+(function(){
+  const svg = document.getElementById('stage');
+  const drop = document.getElementById('drop');
+  const fileInput = document.getElementById('file');
+  const playBtn = document.getElementById('play');
+  const scrub = document.getElementById('scrub');
+  const timeEl = document.getElementById('time');
+  const titleEl = document.getElementById('title');
+
+  const renderer = new SketchEngine.Renderer(svg);
+  let doc = null, t = 0, playing = false, last = 0, raf = null;
+
+  function loadDoc(d){
+    try { doc = SketchEngine.validate(d); }
+    catch(e){ alert(e.message); return; }
+    renderer.load(doc);
+    drop.classList.add('hide');
+    titleEl.textContent = doc.title || '';
+    t = 0; setTime(0); play();
+  }
+  function setTime(nt){
+    t = Math.max(0, Math.min(doc.duration, nt));
+    renderer.render(t);
+    scrub.value = Math.round((t / doc.duration) * 1000);
+    timeEl.textContent = t.toFixed(1) + 's';
+  }
+  function loop(now){
+    if(!playing) return;
+    const dt = (now - last)/1000; last = now;
+    let nt = t + dt;
+    if(nt >= doc.duration) nt = nt % doc.duration;   // loopt
+    setTime(nt);
+    raf = requestAnimationFrame(loop);
+  }
+  function play(){ if(!doc) return; playing = true; playBtn.textContent='❚❚ pause'; last = performance.now(); raf = requestAnimationFrame(loop); }
+  function pause(){ playing = false; playBtn.textContent='▶ abspielen'; if(raf) cancelAnimationFrame(raf); }
+
+  playBtn.onclick = ()=> playing ? pause() : play();
+  document.getElementById('restart').onclick = ()=>{ if(doc){ setTime(0); } };
+  scrub.oninput = ()=>{ if(!doc) return; pause(); setTime((scrub.value/1000)*doc.duration); };
+
+  function readFile(f){
+    const r = new FileReader();
+    r.onload = ()=>{ try { loadDoc(JSON.parse(r.result)); } catch(e){ alert('Konnte .2dsk nicht lesen: '+e.message); } };
+    r.readAsText(f);
+  }
+  fileInput.onchange = ()=>{ if(fileInput.files[0]) readFile(fileInput.files[0]); };
+  document.getElementById('pick').onclick = ()=> fileInput.click();
+  document.getElementById('pick2').onclick = ()=> fileInput.click();
+
+  ['dragover','dragenter'].forEach(ev=> document.addEventListener(ev, e=>{ e.preventDefault(); drop.style.color='#e0122b'; }));
+  ['dragleave','drop'].forEach(ev=> document.addEventListener(ev, e=>{ e.preventDefault(); drop.style.color='#999'; }));
+  document.addEventListener('drop', e=>{ const f = e.dataTransfer.files[0]; if(f) readFile(f); });
+
+  // Optional: ?src=pfad.2dsk automatisch laden
+  const src = new URLSearchParams(location.search).get('src');
+  if(src){ fetch(src).then(r=>r.json()).then(loadDoc).catch(()=>{}); }
+})();
+</script>
+</body>
+</html>
