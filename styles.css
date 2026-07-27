@@ -146,41 +146,11 @@ html, body {
   pointer-events: none;
   z-index: 20;
 }
-.flash.cut { animation: whitecut 0.5s steps(1, end) forwards; }
+.flash.cut { animation: whitecut 0.5s ease forwards; }
 @keyframes whitecut {
   0%   { opacity: 1; }
+  45%  { opacity: 1; }
   100% { opacity: 0; }
-}
-
-/* Vollbild-Rotframe (z.B. „Anleitung") */
-.redframe {
-  position: absolute;
-  inset: 0;
-  background: var(--blood);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 15;
-}
-
-.stage__label {
-  position: absolute;
-  left: 12px;
-  bottom: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #bbb;
-  z-index: 22;
-}
-.stage__count {
-  position: absolute;
-  right: 12px;
-  bottom: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #bbb;
-  z-index: 22;
 }
 
 /* ---------- Steuerung: reine Textlinks ---------- */
@@ -203,14 +173,6 @@ html, body {
 .controls button:hover { color: var(--blood); }
 .controls button:disabled { color: #ccc; cursor: default; }
 
-.motto {
-  margin-top: 40px;
-  text-align: center;
-  font-style: italic;
-  color: #999;
-  font-size: 14px;
-}
-
 /* ---------- SVG-Strichoptik ---------- */
 .stage svg line,
 .stage svg circle,
@@ -226,6 +188,7 @@ html, body {
 }
 .stage svg .head { fill: var(--paper); }
 .stage svg .dot  { fill: var(--ink); stroke: none; }
+.stage svg .xeye { stroke-width: 3.5; }
 .stage svg .ground,
 .stage svg .cliff { stroke: #cfcfcf; stroke-width: 3; }
 
@@ -244,20 +207,14 @@ html, body {
 }
 .stage svg .punchline,
 .stage svg .say,
-.stage svg .nein { font-size: 26px; }
-.stage svg .signtext { font-size: 17px; font-weight: 900; }
-.stage svg .scalezero,
-.stage svg .display { font-size: 18px; }
-.stage svg .display.nein { fill: var(--blood); }
+.stage svg .nein { font-size: 26px; }         /* Pointen-Texte */
+.stage svg .signtext { font-size: 17px; }
+.stage svg .shrugText { font-size: 18px; fill: #555; }
+.stage svg .zero,
+.stage svg .disp { font-size: 18px; }         /* Waagen-Anzeige */
+.stage svg .disp { fill: var(--blood); }
 .stage svg .heart { fill: var(--blood); stroke: var(--blood); }
-.stage svg .whitekey { fill: var(--paper); }
-.stage svg .blade { stroke-width: 4; }
-
-/* ---------- Gemeinsame SVG-Bewegungshilfen ---------- */
-/* on-twos: ruckelige Bewegung über steps() */
-.twitch { animation: twitch 0.5s steps(2, end) infinite; }
-@keyframes twitch {
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(-2px); }
-  100% { transform: translateY(0); }
-}
+.stage svg .whitekey,
+.stage svg .pianolid { fill: var(--paper); }
+.stage svg .board,
+.stage svg .scaledisp { fill: var(--paper); }

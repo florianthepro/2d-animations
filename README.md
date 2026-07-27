@@ -44,7 +44,13 @@ Beim Start erscheint das **FSK-18-Gate**. Mit „Weiter ›" geht es in die Büh
 ## Technik
 
 - **Reines SVG:** Figuren = ein paar `<line>`/`<circle>`-Elemente.
-- **On-twos-Ruckeln:** harte Pose-Wechsel über `opacity` + `steps()` statt
-  weicher Easing-Kurven — ruckelig-charmant.
+- **Flüssige Cartoon-Animation:** weiche Easing-Kurven, Squash & Stretch,
+  Anticipation, Follow-through und Bounce.
+  - Ganze Figur bewegen → `transform: translate/scale` auf `<g>`-Wrapper.
+  - Gliedmaßen drehen → `transform-box: view-box` + `transform-origin` am
+    Gelenk, `rotate()` mit Easing.
+  - Squash & Stretch → `transform-box: fill-box`, `transform-origin: 50% 100%`.
 - **Farbe = Pointe:** alles Schwarz-Weiß, einzige Ausnahme Rot (Blut).
-- **Harte Weißblenden** zwischen den Gags über kurze `opacity`-Cuts.
+- **Weißblenden** zwischen den Gags über kurze `opacity`-Cuts.
+
+Kein Build, keine Abhängigkeiten — alles läuft über CSS-Keyframes im Browser.
