@@ -1,21 +1,4 @@
-/* STRICHE — Sketch-Engine (.2dsk)
- *
- * Gemeinsame Laufzeit für Editor und Player.
- * Ein .2dsk beschreibt eine Szene mit Objekten, die über Keyframe-Spuren
- * flüssig animiert werden (Easing-Interpolation pro Segment).
- *
- * Objekttypen:
- *   stickman  – artikuliertes Strichmännchen (Arme/Beine als Gelenkwinkel)
- *   line, circle, rect, path, text, splat – Primitive
- *   group     – starre Gruppe aus Primitiven (bewegt sich als Einheit)
- *
- * Animierbare Kanäle (Spuren):
- *   x, y     – Position
- *   rot      – Drehung (Grad)
- *   sx, sy   – Skalierung (Squash & Stretch)
- *   op       – Deckkraft
- *   armL, armR, legL, legR – Gelenkwinkel (nur stickman), Grad ab „senkrecht unten"
- */
+/* STRICHE — .2dsk-Laufzeit (Editor + Player teilen sie). */
 (function (global) {
   'use strict';
   const NS = 'http://www.w3.org/2000/svg';
