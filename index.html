@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STRICHE — Ein Strich, ein Gag, ein Grab.</title>
+  <meta name="description" content="STRICHE — kurze, absurde Sketch-Animationen mit Strichmännchen auf weißem Grund. FSK 18.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- FSK-18 Gate -->
+  <div class="gate" id="gate">
+    <div class="gate__badge">18</div>
+    <h1 class="gate__title">STRICHE</h1>
+    <p class="gate__warn">
+      18+ — enthält absurde Cartoon-Gewalt.<br>
+      Alles nur Striche. Es wird gestorben, aber es tut nicht weh.
+    </p>
+    <div class="gate__actions">
+      <a id="enter">Weiter ›</a>
+      <a id="leave" class="deny">‹ Zurück</a>
+    </div>
+  </div>
+
+  <!-- Seite -->
+  <main class="page hidden" id="page">
+    <header class="topbar">
+      <h1 class="brand">STRICHE</h1>
+      <span class="brand__tag">Ein Strich, ein Gag, ein Grab.</span>
+      <div class="fsk">18</div>
+    </header>
+
+    <section class="stage-wrap">
+      <div class="stage">
+        <div id="stage"></div>
+        <div class="flash" id="flash"></div>
+      </div>
+
+      <nav class="controls">
+        <button id="prev">‹ zurück</button>
+        <button id="play">abspielen</button>
+        <button id="next">weiter ›</button>
+      </nav>
+    </section>
+
+    <nav class="tools">
+      <a href="editor.html">Sketch-Editor</a>
+      <span>·</span>
+      <a href="player.html">.2dsk-Player</a>
+    </nav>
+  </main>
+
+  <script src="sketches.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
