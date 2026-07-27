@@ -49,13 +49,23 @@
   .prop { margin-bottom:7px; }
   .prop label { display:block; font-size:11px; color:#888; margin-bottom:2px; }
   .prop input, .prop select { width:100%; font:inherit; font-size:13px; border:1px solid var(--line); padding:3px 5px; border-radius:4px; }
-  .chan { display:grid; grid-template-columns:52px 1fr auto auto; gap:4px; align-items:center; margin-bottom:4px; }
+  .chan { display:grid; grid-template-columns:46px 1fr 42px auto auto; gap:4px; align-items:center; margin-bottom:5px; }
   .chan .cname { font-size:11px; color:#888; }
-  .chan input.val { font:inherit; font-size:12px; border:1px solid var(--line); padding:2px 4px; border-radius:4px; width:100%; }
+  .chan input.sld { width:100%; accent-color:var(--blood); }
+  .chan input.val { font:inherit; font-size:12px; border:1px solid var(--line); padding:2px 3px; border-radius:4px; width:100%; }
   .chan input.val.haskey { border-color:var(--blood); }
   .chan button.key { border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px; padding:2px 5px; }
   .chan button.key:hover { border-color:var(--blood); color:var(--blood); }
-  .chan select.ez { font-size:10px; border:1px solid var(--line); border-radius:4px; padding:1px; max-width:76px; }
+  .chan select.ez { font-size:10px; border:1px solid var(--line); border-radius:4px; padding:1px; max-width:70px; }
+
+  .quick { display:flex; gap:5px; margin:2px 0 12px; }
+  .quick button { flex:1; font:inherit; font-size:11px; font-weight:700; border:1px solid var(--line); background:#fff; border-radius:5px; padding:6px 2px; cursor:pointer; }
+  .quick button:hover { border-color:var(--blood); color:var(--blood); }
+
+  #handles { position:absolute; inset:0; pointer-events:none; }
+  .limbh { position:absolute; width:15px; height:15px; margin:-7.5px 0 0 -7.5px; border-radius:50%;
+    background:#fff; border:2px solid var(--blood); pointer-events:auto; cursor:grab; box-shadow:0 1px 2px rgba(0,0,0,.25); display:none; }
+  .stagetip { position:absolute; bottom:2px; left:0; right:0; text-align:center; font-size:11px; color:#bbb; pointer-events:none; }
 
   .timeline { flex:none; height:190px; border-top:3px solid var(--ink); display:flex; flex-direction:column; background:var(--panel); }
   .tl-top { display:flex; align-items:center; gap:12px; padding:6px 12px; border-bottom:1px solid var(--line); }
@@ -104,7 +114,9 @@
       <div class="stagebox" id="stagebox">
         <svg id="stage" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet"></svg>
         <div class="selbox" id="selbox"></div>
+        <div id="handles"></div>
       </div>
+      <div class="stagetip" id="stagetip">Objekt anklicken &amp; ziehen · bei Figuren die roten Punkte (Hand/Fuß) ziehen</div>
     </div>
 
     <div class="panel right" id="props">
@@ -136,10 +148,33 @@
 
   const CH_COMMON = ['x','y','rot','sx','sy','op'];
   const CH_STICK = ['armL','armR','legL','legR'];
-  const LABEL = { x:'X', y:'Y', rot:'Dreh°', sx:'Breite', sy:'Höhe', op:'Deckk.', armL:'Arm L', armR:'Arm R', legL:'Bein L', legR:'Bein R' };
+  const LABEL = { x:'X', y:'Y', rot:'Dreh°', sx:'Breite', sy:'Höhe', op:'Sicht', armL:'Arm L', armR:'Arm R', legL:'Bein L', legR:'Bein R' };
+  const RANGE = { x:[0,800,1], y:[0,450,1], rot:[-180,180,1], sx:[0,2,0.01], sy:[0,2,0.01], op:[0,1,0.01],
+                  armL:[-180,180,1], armR:[-180,180,1], legL:[-180,180,1], legR:[-180,180,1] };
 
   function sel(){ return doc.objects.find(o=>o.id===selId) || null; }
   function chansFor(o){ return o.type==='stickman' ? CH_COMMON.concat(CH_STICK) : CH_COMMON; }
+
+  // Schnell-Aktionen: setzen fertige Keyframe-Gruppen am Playhead.
+  function quickAction(o, q){
+    const t = time, D = doc.duration, before = Math.max(0, t - 0.18), after = Math.min(D, t + 0.16);
+    if(q==='appear'){
+      setKey(o,'op',before,0,'linear'); setKey(o,'op',t,1,'back');
+      setKey(o,'sx',before,0.2,'linear'); setKey(o,'sx',t,1.12,'back'); setKey(o,'sx',after,1,'ease-out');
+      setKey(o,'sy',before,0.2,'linear'); setKey(o,'sy',t,1.12,'back'); setKey(o,'sy',after,1,'ease-out');
+    } else if(q==='vanish'){
+      setKey(o,'op',t,1,'ease-in'); setKey(o,'op',Math.min(D,t+0.18),0,'ease-in');
+      setKey(o,'sy',t,1,'ease-in'); setKey(o,'sy',Math.min(D,t+0.18),0.2,'ease-in');
+    } else if(q==='pop'){
+      setKey(o,'sx',t,0.6,'ease-out'); setKey(o,'sx',Math.min(D,t+0.08),1.2,'back'); setKey(o,'sx',Math.min(D,t+0.2),1,'ease-out');
+      setKey(o,'sy',t,0.6,'ease-out'); setKey(o,'sy',Math.min(D,t+0.08),1.2,'back'); setKey(o,'sy',Math.min(D,t+0.2),1,'ease-out');
+    }
+  }
+
+  // Bühnen-Koordinaten <-> Bildschirm (für Gliedmaßen-Ziehpunkte)
+  function svgPt(x,y){ const p=svg.createSVGPoint(); p.x=x; p.y=y; return p; }
+  function localToClient(g,x,y){ const m=g.getScreenCTM(); return m ? svgPt(x,y).matrixTransform(m) : null; }
+  function clientToLocal(g,cx,cy){ const m=g.getScreenCTM(); return m ? svgPt(cx,cy).matrixTransform(m.inverse()) : null; }
 
   /* ---------- Keyframe-Helfer ---------- */
   function setKey(o, ch, t, v, e){
@@ -163,8 +198,8 @@
   }
 
   /* ---------- Render ---------- */
-  function rebuild(){ renderer.load(doc); renderer.render(time); drawSel(); }
-  function refresh(){ renderer.render(time); drawSel(); }
+  function rebuild(){ renderer.load(doc); refresh(); }
+  function refresh(){ renderer.render(time); drawSel(); drawLimbHandles(); }
   function drawSel(){
     const box = document.getElementById('selbox');
     const o = sel();
@@ -179,6 +214,36 @@
     box.style.top = (gr.top-cr.top-4)+'px';
     box.style.width = (gr.width+8)+'px';
     box.style.height = (gr.height+8)+'px';
+  }
+
+  // Ziehpunkte an Hand/Fuß der gewählten Figur
+  const HND = {};
+  function setupHandles(){
+    const c = document.getElementById('handles');
+    ['armL','armR','legL','legR'].forEach(limb=>{
+      const d = document.createElement('div'); d.className='limbh'; d.title = (limb[0]==='a'?'Hand':'Fuß')+' ziehen';
+      c.appendChild(d); HND[limb]=d;
+      d.onpointerdown=(e)=>{
+        e.preventDefault(); e.stopPropagation();
+        const o=sel(); if(!o||o.type!=='stickman') return;
+        const h=renderer.handleFor(o.id); if(!h) return;
+        const joint = limb[0]==='a' ? [0,-42] : [0,0];
+        const move=(ev)=>{ const loc=clientToLocal(h.g,ev.clientX,ev.clientY); if(!loc) return;
+          let ang=Math.atan2(loc.x-joint[0], loc.y-joint[1])*180/Math.PI; editChannel(o,limb,Math.round(ang)); refresh(); };
+        const up=()=>{ document.removeEventListener('pointermove',move); document.removeEventListener('pointerup',up); renderTracks(); renderProps(); };
+        document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
+      };
+    });
+  }
+  function drawLimbHandles(){
+    const o=sel(); const show = o && o.type==='stickman';
+    ['armL','armR','legL','legR'].forEach(l=>{ if(HND[l]) HND[l].style.display = show?'block':'none'; });
+    if(!show) return;
+    const h=renderer.handleFor(o.id); if(!h) return;
+    const cr=document.getElementById('stagebox').getBoundingClientRect();
+    ['armL','armR','legL','legR'].forEach(l=>{ const ln=h.parts[l]; if(!ln) return;
+      const c=localToClient(h.g, +ln.getAttribute('x2'), +ln.getAttribute('y2')); if(!c) return;
+      HND[l].style.left=(c.x-cr.left)+'px'; HND[l].style.top=(c.y-cr.top)+'px'; });
   }
 
   /* ---------- Objektliste ---------- */
@@ -209,6 +274,11 @@
     const o = sel();
     if(!o){ el.innerHTML='<p class="empty">Kein Objekt gewählt.</p>'; return; }
     let html = `<h3>${o.type}</h3>`;
+    html += `<div class="quick">
+      <button data-q="appear" title="Objekt erscheint ab dieser Zeit">✨ erscheint</button>
+      <button data-q="pop" title="kurzer Pop">⤢ Pop</button>
+      <button data-q="vanish" title="Objekt verschwindet ab dieser Zeit">💨 weg</button>
+    </div>`;
     const p = o.props;
     const inp = (label,id,val,type)=>`<div class="prop"><label>${label}</label><input id="${id}" type="${type||'text'}" value="${val==null?'':val}"></div>`;
     const selBox=(label,id,val,opts)=>`<div class="prop"><label>${label}</label><select id="${id}">${opts.map(x=>`<option ${x===val?'selected':''}>${x}</option>`).join('')}</select></div>`;
@@ -223,14 +293,22 @@
     chansFor(o).forEach(ch=>{
       const v = E.channelValue(o, ch, time);
       const has = o.keys[ch] && o.keys[ch].length;
+      const r = RANGE[ch];
       html += `<div class="chan">
         <span class="cname">${LABEL[ch]}</span>
+        <input type="range" class="sld" data-ch="${ch}" min="${r[0]}" max="${r[1]}" step="${r[2]}" value="${+v}">
         <input class="val ${has?'haskey':''}" data-ch="${ch}" value="${(+v).toFixed(1)}">
-        <button class="key" data-ch="${ch}" title="Keyframe setzen">◆</button>
-        <select class="ez" data-ch="${ch}">${E.EASING_NAMES.map(n=>`<option ${n===easeAtOrBefore(o,ch,time)?'selected':''}>${n}</option>`).join('')}</select>
+        <button class="key" data-ch="${ch}" title="Keyframe hier setzen">◆</button>
+        <select class="ez" data-ch="${ch}" title="Übergang zu diesem Keyframe">${E.EASING_NAMES.map(n=>`<option ${n===easeAtOrBefore(o,ch,time)?'selected':''}>${n}</option>`).join('')}</select>
       </div>`;
     });
     el.innerHTML = html;
+
+    el.querySelectorAll('.quick button').forEach(b=> b.onclick=()=>{ quickAction(o, b.dataset.q); rebuild(); renderTracks(); renderProps(); });
+    el.querySelectorAll('input.sld').forEach(s=>{
+      s.oninput=()=>{ const ch=s.dataset.ch; editChannel(o,ch,+s.value); const vi=el.querySelector('input.val[data-ch="'+ch+'"]'); if(vi){ vi.value=(+s.value).toFixed(1); vi.classList.add('haskey'); } refresh(); };
+      s.onchange=()=>{ renderTracks(); renderProps(); };
+    });
 
     // static bindings
     const bindStatic=(id,fn)=>{ const e=document.getElementById(id); if(e){ e.onchange=()=>{ fn(e.value); rebuild(); renderProps(); }; e.oninput=()=>{ fn(e.value); rebuild(); }; } };
@@ -348,7 +426,7 @@
   function renderAll(){ renderList(); renderProps(); renderTracks(); drawSel(); }
 
   // Init
-  buildAddGrid();
+  buildAddGrid(); setupHandles();
   rebuild(); renderRuler(); renderAll(); positionPlayhead();
   window.addEventListener('resize', ()=>{ renderRuler(); renderTracks(); positionPlayhead(); drawSel(); });
 
